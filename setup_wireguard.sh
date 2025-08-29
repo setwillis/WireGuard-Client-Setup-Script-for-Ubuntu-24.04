@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # WireGuard Client Setup Script for Ubuntu 24.04
+# Автор: Assistant
 # Версия: 1.0
 
 set -e
