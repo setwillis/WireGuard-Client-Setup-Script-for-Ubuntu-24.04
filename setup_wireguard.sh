@@ -2,7 +2,7 @@
 
 # WireGuard Client Setup Script for Ubuntu 24.04
 # Автор: Assistant
-# Версия: 1.1
+# Версия: 1.2
 
 set -e
 
@@ -15,21 +15,21 @@ NC='\033[0m' # No Color
 
 # Функция для вывода сообщений
 print_message() {
-    echo -e "${GREEN}[INFO]${NC} $1"
+    echo -e "${GREEN}[INFO]${NC} $1" >&2
 }
 
 print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    echo -e "${YELLOW}[WARNING]${NC} $1" >&2
 }
 
 print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $1" >&2
 }
 
 print_header() {
-    echo -e "${BLUE}================================${NC}"
-    echo -e "${BLUE}$1${NC}"
-    echo -e "${BLUE}================================${NC}"
+    echo -e "${BLUE}================================${NC}" >&2
+    echo -e "${BLUE}$1${NC}" >&2
+    echo -e "${BLUE}================================${NC}" >&2
 }
 
 # Проверка запуска от root
@@ -55,11 +55,14 @@ install_wireguard() {
 
 # Функция для ввода конфига целиком
 input_full_config() {
-    print_header "ВВОД ПОЛНОГО КОНФИГА"
+    # Выводим заголовок только в stderr
+    echo -e "${BLUE}================================${NC}" >&2
+    echo -e "${BLUE}ВВОД ПОЛНОГО КОНФИГА${NC}" >&2
+    echo -e "${BLUE}================================${NC}" >&2
     
-    echo ""
-    echo -e "${YELLOW}Вставьте полный конфиг WireGuard (после ввода нажмите Ctrl+D):${NC}"
-    echo ""
+    echo "" >&2
+    echo -e "${YELLOW}Вставьте полный конфиг WireGuard (после ввода нажмите Ctrl+D):${NC}" >&2
+    echo "" >&2
     
     # Читаем многострочный ввод
     config_content=$(cat)
@@ -68,22 +71,22 @@ input_full_config() {
     config_content=$(echo "$config_content" | sed '/^[[:space:]]*$/d')
     
     if [[ -z "$config_content" ]]; then
-        print_error "Конфигурация пуста!"
+        echo -e "${RED}[ERROR]${NC} Конфигурация пуста!" >&2
         return 1
     fi
     
     # Проверяем наличие обязательных секций
     if ! echo "$config_content" | grep -q "\[Interface\]"; then
-        print_error "Конфигурация не содержит секцию [Interface]!"
+        echo -e "${RED}[ERROR]${NC} Конфигурация не содержит секцию [Interface]!" >&2
         return 1
     fi
     
     if ! echo "$config_content" | grep -q "\[Peer\]"; then
-        print_error "Конфигурация не содержит секцию [Peer]!"
+        echo -e "${RED}[ERROR]${NC} Конфигурация не содержит секцию [Peer]!" >&2
         return 1
     fi
     
-    print_message "Конфигурация успешно получена"
+    echo -e "${GREEN}[INFO]${NC} Конфигурация успешно получена" >&2
     echo "$config_content"
     return 0
 }
@@ -149,9 +152,9 @@ $keepalive"
 # Основное меню
 main_menu() {
     print_header "НАСТРОЙКА КОНФИГУРАЦИИ WIREGUARD"
-    echo "1) Ввести полный конфиг"
-    echo "2) Ввести параметры вручную"
-    echo -e "${YELLOW}Выберите способ настройки (1 или 2):${NC} "
+    echo "1) Ввести полный конфиг" >&2
+    echo "2) Ввести параметры вручную" >&2
+    echo -e "${YELLOW}Выберите способ настройки (1 или 2):${NC} " >&2
     
     read -r choice
     
@@ -243,12 +246,12 @@ show_status() {
 # Функция для управления соединением
 manage_connection() {
     print_header "УПРАВЛЕНИЕ СОЕДИНЕНИЕМ"
-    echo "1) Запустить соединение"
-    echo "2) Остановить соединение"
-    echo "3) Перезапустить соединение"
-    echo "4) Показать статус"
-    echo "5) Показать конфигурацию"
-    echo -e "${YELLOW}Выберите действие (1-5):${NC} "
+    echo "1) Запустить соединение" >&2
+    echo "2) Остановить соединение" >&2
+    echo "3) Перезапустить соединение" >&2
+    echo "4) Показать статус" >&2
+    echo "5) Показать конфигурацию" >&2
+    echo -e "${YELLOW}Выберите действие (1-5):${NC} " >&2
     
     read -r action
     
@@ -291,10 +294,10 @@ main() {
         print_message "WireGuard уже установлен"
     fi
     
-    echo ""
-    echo "1) Настроить новое соединение"
-    echo "2) Управлять существующим соединением"
-    echo -e "${YELLOW}Выберите действие (1 или 2):${NC} "
+    echo "" >&2
+    echo "1) Настроить новое соединение" >&2
+    echo "2) Управлять существующим соединением" >&2
+    echo -e "${YELLOW}Выберите действие (1 или 2):${NC} " >&2
     
     read -r main_choice
     
@@ -308,11 +311,11 @@ main() {
             print_header "УСТАНОВКА ЗАВЕРШЕНА"
             print_message "WireGuard клиент успешно настроен!"
             print_message "Для управления используйте команды:"
-            echo -e "  ${BLUE}systemctl start wg-quick@wg0${NC}   - запустить"
-            echo -e "  ${BLUE}systemctl stop wg-quick@wg0${NC}    - остановить"
-            echo -e "  ${BLUE}systemctl restart wg-quick@wg0${NC} - перезапустить"
-            echo -e "  ${BLUE}wg show${NC}                        - показать статус"
-            echo -e "  ${BLUE}systemctl status wg-quick@wg0${NC}  - статус сервиса"
+            echo -e "  ${BLUE}systemctl start wg-quick@wg0${NC}   - запустить" >&2
+            echo -e "  ${BLUE}systemctl stop wg-quick@wg0${NC}    - остановить" >&2
+            echo -e "  ${BLUE}systemctl restart wg-quick@wg0${NC} - перезапустить" >&2
+            echo -e "  ${BLUE}wg show${NC}                        - показать статус" >&2
+            echo -e "  ${BLUE}systemctl status wg-quick@wg0${NC}  - статус сервиса" >&2
             ;;
         2)
             interface_name="wg0"
